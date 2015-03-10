@@ -143,12 +143,13 @@ class _DirectDebitBatchMessage(object):
         payment_information.creditor_agent.agent_identifier.feed({
             'bic': self.creditor_bic,
         })
-        payment_information.creditor_identifier.identification.physical_person.other.feed({
-            'identification': self.creditor_identifier,
-        })
-        payment_information.creditor_identifier.identification.physical_person.other.scheme_name.feed({
-            'proprietary': 'SEPA',
-        })
+        if self.creditor_identifier:
+            payment_information.creditor_identifier.identification.physical_person.other.feed({
+                'identification': self.creditor_identifier,
+            })
+            payment_information.creditor_identifier.identification.physical_person.other.scheme_name.feed({
+                'proprietary': 'SEPA',
+            })
 
         for operation in self.operations:
             payment_information.direct_debit_operation_info.append(
@@ -215,5 +216,6 @@ class DirectDebitMessage(object):
         xml.feed({
             'customer_direct_debit': direct_debit
         })
+        xml.pretty_print = True
         xml.build_tree()
         return str(xml)
