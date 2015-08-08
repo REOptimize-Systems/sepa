@@ -42,10 +42,13 @@ class _DirectDebitOperationMessage(object):
             'end_to_end_identifier': self.end_to_end_identifier,
         })
 
-        mandate_information = {
-            'mandate_identifier': self.mandate_identifier,
-            'date_of_sign': self.mandate_date_of_sign.isoformat(),
-        }
+        mandate_information = {}
+
+        if self.mandate_identifier and self.mandate_date_of_sign:
+            mandate_information['mandate_identifier'] = self.mandate_identifier
+            mandate_information['date_of_sign'] = self.mandate_date_of_sign.isoformat()
+        elif self.mandate_identifier:
+            mandate_information['mandate_identifier'] = self.mandate_identifier
 
         # Manage a bank account change
         if self.has_mandate_modification():
