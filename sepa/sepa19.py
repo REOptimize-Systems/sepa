@@ -386,13 +386,23 @@ class BankAgent(XmlModel):
         super(BankAgent, self).__init__('CdtrAgt', 'bank_agent')
 
 
+class RemittanceInformation(XmlModel):
+    _sort_order = ('remittance_information', 'unstructured',)
+
+    def __init__(self):
+        self.remittance_information = XmlField('RmtInf')
+        self.unstructured = XmlField('Ustrd')
+        super(RemittanceInformation,
+              self).__init__('RmtInf', 'remittance_information')
+
+
 class DirectDebitOperationInfo(XmlModel):
     _sort_order = ('direct_debit_operation_info', 'payment_identifier',
                    'instructed_amount', 'charge_clausule',
                    'direct_debit_operation', 'ultimate_creditor',
                    'ultimate_creditor', 'debtor_agent', 'debtor',
                    'debtor_account', 'ultimate_debtor', 'purpose',
-                   'regulatory_reglament', 'concept')
+                   'regulatory_reglament', 'concept', 'remittance_information')
 
     def __init__(self):
         self.direct_debit_operation_info = XmlField('DrctDbtTxInf')
@@ -408,6 +418,7 @@ class DirectDebitOperationInfo(XmlModel):
         self.purpose = Purpose()
         self.regulatory_reglament = RegulatoryInformation()
         self.concept = Concept()
+        self.remittance_information = RemittanceInformation()
         super(DirectDebitOperationInfo,
               self).__init__('DrctDbtTxInf', 'direct_debit_operation_info')
 

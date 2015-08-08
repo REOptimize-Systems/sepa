@@ -11,7 +11,7 @@ class _DirectDebitOperationMessage(object):
 
     def __init__(self, amount, end_to_end_identifier, mandate_identifier,
         mandate_date_of_sign, debtor_name, debtor_bic, debtor_iban, ccy=None,
-        old_debtor_bic=None, old_debtor_iban=None):
+        old_debtor_bic=None, old_debtor_iban=None, remittance_description=None):
         self.amount = amount
         self.end_to_end_identifier = end_to_end_identifier
         self.mandate_identifier = mandate_identifier
@@ -19,6 +19,7 @@ class _DirectDebitOperationMessage(object):
         self.debtor_name = debtor_name
         self.debtor_bic = debtor_bic
         self.debtor_iban = debtor_iban
+        self.remittance_description = remittance_description
         self.ccy = ccy or DEFAULT_CURRENCY
         self.old_debtor_bic = old_debtor_bic
         self.old_debtor_iban = old_debtor_iban
@@ -76,6 +77,11 @@ class _DirectDebitOperationMessage(object):
         direct_debit_operation_info.debtor_account.account_identification.feed({
             'iban': self.debtor_iban,
         })
+        if self.remittance_description:
+            direct_debit_operation_info.remittance_information.feed({
+                'unstructured': self.remittance_description,
+            })
+
         return direct_debit_operation_info
 
 
@@ -100,7 +106,7 @@ class _DirectDebitBatchMessage(object):
 
     def add_operation(self, amount, end_to_end_identifier, mandate_identifier,
         mandate_date_of_sign, debtor_name, debtor_bic, debtor_iban, ccy=None,
-        old_debtor_bic=None, old_debtor_iban=None):
+        old_debtor_bic=None, old_debtor_iban=None, remittance_description=None):
         operation = _DirectDebitOperationMessage(
             amount,
             end_to_end_identifier,
@@ -111,7 +117,8 @@ class _DirectDebitBatchMessage(object):
             debtor_iban,
             ccy,
             old_debtor_bic,
-            old_debtor_iban)
+            old_debtor_iban,
+            remittance_description)
         self.operations.append(operation)
         return operation
 
