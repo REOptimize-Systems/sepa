@@ -79,7 +79,7 @@ class _DirectDebitOperationMessage(object):
 class _DirectDebitBatchMessage(object):
 
     def __init__(self, payment_info_identifier, sequence_type, creditor_name,
-        creditor_iban, creditor_bic, creditor_identifier):
+        creditor_iban, creditor_bic, creditor_identifier, collection_date):
         self.operations = []
         self.payment_info_identifier = payment_info_identifier
         self.creditor_name = creditor_name
@@ -87,6 +87,7 @@ class _DirectDebitBatchMessage(object):
         self.creditor_iban = creditor_iban
         self.creditor_bic = creditor_bic
         self.creditor_identifier = creditor_identifier
+        self.collection_date = collection_date
 
     def get_checksum(self):
         return sum([operation.amount for operation in self.operations])
@@ -116,14 +117,13 @@ class _DirectDebitBatchMessage(object):
         if self.get_number_of_operations() == 0:
             return
 
-        now = datetime.datetime.now()
         payment_information = sepa19.PaymentInformation()
         payment_information.feed({
             'payment_info_identifier': self.payment_info_identifier,
             'payment_method': 'DD',
             'number_of_operations': self.get_number_of_operations(),
             'checksum': self.get_checksum(),
-            'collection_date': now.date().isoformat(), #BAD
+            'collection_date': self.collection_date.isoformat(),
         })
         payment_information.creditor.feed({
             'name_name': self.creditor_name,
@@ -175,14 +175,15 @@ class DirectDebitMessage(object):
         return sum([batch.get_number_of_operations() for batch in self.batches])
 
     def add_batch(self, payment_info_identifier, sequence_type, creditor_name,
-        creditor_iban, creditor_bic, creditor_identifier):
+        creditor_iban, creditor_bic, creditor_identifier, collection_date):
         batch = _DirectDebitBatchMessage(
             payment_info_identifier,
             sequence_type,
             creditor_name,
             creditor_iban,
             creditor_bic,
-            creditor_identifier)
+            creditor_identifier,
+            collection_date)
         self.batches.append(batch)
         return batch
 
