@@ -68,9 +68,15 @@ class _DirectDebitOperationMessage(object):
 
         direct_debit_operation_info.direct_debit_operation.mandate_information.feed(mandate_information)
 
-        direct_debit_operation_info.debtor_agent.agent_identifier.feed({
-            'bic': self.debtor_bic,
-        })
+        if (self.debtor_bic is None):
+            direct_debit_operation_info.debtor_agent.empty_agent_identifier.feed({
+                'id': 'NOTPROVIDED',
+            })
+        else:
+            del direct_debit_operation_info.debtor_agent.empty_agent_identifier
+            direct_debit_operation_info.debtor_agent.agent_identifier.feed({
+                'bic': self.debtor_bic,
+            })
         direct_debit_operation_info.debtor.feed({
             'entity_name': self.debtor_name,
         })
@@ -150,9 +156,17 @@ class _DirectDebitBatchMessage(object):
         payment_information.creditor_account.account_identification.feed({
             'iban': self.creditor_iban,
         })
-        payment_information.creditor_agent.agent_identifier.feed({
-            'bic': self.creditor_bic,
-        })
+
+        if (self.creditor_bic is None):
+            payment_information.creditor_agent.empty_agent_identifier.feed({
+                'id': 'NOTPROVIDED',
+            })
+        else:
+            del payment_information.creditor_agent.empty_agent_identifier
+            payment_information.creditor_agent.agent_identifier.feed({
+                'bic': self.creditor_bic,
+            })
+
         if self.creditor_identifier:
             payment_information.creditor_identifier.identification.physical_person.other.feed({
                 'identification': self.creditor_identifier,
@@ -173,10 +187,12 @@ class DirectDebitMessage(object):
     Use this class to generate a SEPA message for direct debits.
     """
 
-    def __init__(self, entity_name, message_id):
+    def __init__(self, entity_name, message_id, creditor_bic, presenter_id):
         self.batches = []
         self.entity_name = entity_name
         self.message_id = message_id
+        self.creditor_bic = creditor_bic
+        self.presenter_id = presenter_id
 
     def get_checksum(self):
         return sum([batch.get_checksum() for batch in self.batches])
@@ -206,6 +222,7 @@ class DirectDebitMessage(object):
         # Header
         initiating_party = sepa19.GenericPhysicalLegalEntity('InitgPty')
         initiating_party.feed({'entity_name': self.entity_name})
+        initiating_party.identification.legal_entity.other.feed({'identification': self.presenter_id })
         header = sepa19.SepaHeader()
         header_fields = {
             'message_id': self.message_id,
@@ -213,6 +230,7 @@ class DirectDebitMessage(object):
             'number_of_operations': self.get_number_of_operations(),
             'checksum': self.get_checksum(),
             'initiating_party': initiating_party,
+            'creditor_agent': self.creditor_bic,
         }
         header.feed(header_fields)
         direct_debit.feed({

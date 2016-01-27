@@ -12,6 +12,8 @@ from libcomxml.core import XmlModel, XmlField
 """
 
 MAX_NAME = 70
+MAX_ID_FIELD = 35
+MAX_DES = 140
 
 ############################### Level 7 ######################################
 
@@ -66,7 +68,7 @@ class OtherLegalEntity(XmlModel):
 
     def __init__(self):
         self.other = XmlField('Othr')
-        self.identification = XmlField('Id')
+        self.identification = XmlField('Id',rep = lambda  x : x[:MAX_ID_FIELD])
         self.scheme_name = SchemeName()
         self.issuer = XmlField('Issr')
         super(OtherLegalEntity, self).__init__('Othr', 'other')
@@ -245,6 +247,17 @@ class AgentIdentifier(XmlModel):
         super(AgentIdentifier, self).__init__('FinInstnId', 'agent_identifier')
 
 
+class EmptyAgentIdentifier(XmlModel):
+    _sort_order = ('empty_agent_identifier', 'othr')
+
+    def __init__(self):
+        self.empty_agent_identifier = XmlField('FinInstnId')
+        self.id = XmlField('Id')
+        self.othr = XmlField('Othr',self.id)
+        super(EmptyAgentIdentifier, self).__init__('FinInstnId',
+                                                   'empty_agent_identifier')
+
+
 class PaymentIdentifier(XmlModel):
     _sort_order = ('payment_identifier', 'instrucction_identifier',
                    'end_to_end_identifier')
@@ -334,7 +347,8 @@ class OriginalOperationRef(XmlModel):
 
 
 class GenericPhysicalLegalEntity(XmlModel):
-    _sort_order = ('main_tag', 'entity_name', 'postal_address', 'identification')
+    _sort_order = ('main_tag', 'entity_name', 'postal_address', 'identification',
+                    'other')
 
     def __init__(self, tag):
         self.main_tag = XmlField(tag)
@@ -378,11 +392,12 @@ class BankAccount(XmlModel):
 
 
 class BankAgent(XmlModel):
-    _sort_order = ('bank_agent', 'agent_identifier')
+    _sort_order = ('bank_agent', 'agent_identifier', 'empty_agent_identifier')
 
     def __init__(self, tag):
         self.bank_agent = XmlField(tag)
         self.agent_identifier = AgentIdentifier()
+        self.empty_agent_identifier = EmptyAgentIdentifier()
         super(BankAgent, self).__init__('CdtrAgt', 'bank_agent')
 
 
