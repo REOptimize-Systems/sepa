@@ -11,7 +11,7 @@ class _DirectDebitOperationMessage(object):
 
     def __init__(self, amount, end_to_end_identifier, mandate_identifier,
         mandate_date_of_sign, debtor_name, debtor_bic, debtor_iban, ccy=None,
-        old_debtor_bic=None, old_debtor_iban=None, remittance_description=None):
+        old_debtor_bic=None, old_debtor_iban=None, remittance_description=None, pretty=False):
         self.amount = amount
         self.end_to_end_identifier = end_to_end_identifier
         self.mandate_identifier = mandate_identifier
@@ -23,6 +23,7 @@ class _DirectDebitOperationMessage(object):
         self.ccy = ccy or DEFAULT_CURRENCY
         self.old_debtor_bic = old_debtor_bic
         self.old_debtor_iban = old_debtor_iban
+        self.pretty = pretty
 
     def has_mandate_modification(self):
         """
@@ -245,6 +246,6 @@ class DirectDebitMessage(object):
         xml.feed({
             'customer_direct_debit': direct_debit
         })
-        xml.pretty_print = True
+        xml.pretty_print = self.pretty
         xml.build_tree()
         return str(xml)
