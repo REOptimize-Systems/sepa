@@ -213,7 +213,7 @@ class DirectDebitMessage(object):
         self.batches.append(batch)
         return batch
 
-    def get_xml(self,pretty=False):
+    def get_xml(self, pretty=False):
 
         now = datetime.datetime.now()
         xml = sepa19.DirectDebitInitDocument()
@@ -247,4 +247,7 @@ class DirectDebitMessage(object):
         })
         xml.pretty_print = pretty
         xml.build_tree()
-        return str(xml)
+
+        # Since Python 3 compatibility of libComXML, xml tag declaration is
+        # omitted while running on Python 3, but we still need it.
+        return "<?xml version='1.0' encoding='UTF-8'?>\n" + str(xml)
